@@ -1,85 +1,162 @@
-body, html {
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
     font-family: Arial, sans-serif;
 }
 
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --background-color: #f5f7fa;
+    --text-color: #333;
+    --accent-color: #e74c3c;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+h1 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
 #search-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-    background-color: #fff; /* Ensure visibility on top of other elements */
-    padding: 5px; /* Add padding for visual spacing around the buttons */
-    border-radius: 5px; /* Optional: rounded corners for the container */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adding a subtle shadow for depth */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2rem;
 }
 
-#search-box, #data-box { /* Apply consistent styling to both text boxes */
-    padding: 5px;
-    margin-right: 5px;
-    margin-bottom: 5px; /* Ensure spacing between elements */
+#search-box {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-#search-btn, #add-data-btn, #submit-data-btn, #refresh-btn { /* Consistent button styling */
-    padding: 5px;
-    margin-right: 5px; /* Ensure spacing between buttons if placed side by side */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-#answer {
-    padding: 5px;
-    font-size: 15px;
-    max-width:600px;
+button:hover {
+    background-color: var(--secondary-color);
+}
+
+#cy {
+    height: 500px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 2rem;
 }
 
 #add-data-form {
-    position: absolute;
-    top: 60px; /* Adjust based on the size of your search container */
-    left: 10px;
-    z-index: 9; /* Below the search container, but above other content */
-    background-color: #fff; /* Match the search container's background */
-    padding: 5px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+#input-type-selector, #data-box {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 #csv-upload-container {
-    margin-top: 20px;
-    text-align: center;
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
 }
 
 #csv-file-input {
-    margin-bottom: 10px;
-}
-
-
-#cy {
-    width: 75%;
-    height: 95vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-right: 1px solid #ccc;
-    font-size:12px;
+    flex-grow: 1;
 }
 
 #sidebar {
-    width: 25%;
-    height: 95vh;
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #f8f8f8;
-    overflow-y: auto;
-    border-left: 1px solid #ccc;
-    padding: 10px;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
 }
 
-.highlighted {
-    background-color: yellow;
-    border-color: red;
-    line-color: red;
-    target-arrow-color: red;
+.bg-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(45deg, #f1f3f5 25%, transparent 25%),
+                      linear-gradient(-45deg, #f1f3f5 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, #f1f3f5 75%),
+                      linear-gradient(-45deg, transparent 75%, #f1f3f5 75%);
+    background-size: 20px 20px;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+.accent-circle {
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.accent-circle:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    background-color: rgba(52, 152, 219, 0.1);
+    top: -150px;
+    left: -150px;
+}
+
+.accent-circle:nth-child(2) {
+    width: 200px;
+    height: 200px;
+    background-color: rgba(231, 76, 60, 0.1);
+    bottom: -100px;
+    right: -100px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    #search-container {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
 }
