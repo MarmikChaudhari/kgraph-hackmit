@@ -30,7 +30,6 @@ from .models import (
     delete_entity,
     add_relationship,
     search_entities,
-    search_entities_with_type,
     search_relationships,
 )
 from .signals import entity_created, entity_updated, entity_deleted
@@ -69,20 +68,19 @@ def trigger_integration(integration_name):
   integration_function = get_integration_function(integration_name)
   if integration_function:
     # Capture the return value which should be a Flask response
-    response = integration_function(current_app._get_current_object(), data)
+    response = integration_function(current_app, data)
     return response
   return jsonify(error="Integration function not found"), 404
 
 
-@main.route("/<entity_type>", methods=["POST"])
-def create_entity(entity_type):
+@main.route("/<int:entity_id>", methods=["POST"])
+def create_entity():
   data = request.json
-  entity_id = add_entity(entity_type, data)
+  entity_id = add_entity(data)
 
   # Send signal for the created entity, if you want to trigger it for other types, remove the condition.
   entity_created.send(
-      current_app._get_current_object(),
-      entity_type=entity_type,
+      current_app,
       entity_id=entity_id,
       data=data,
   )
@@ -90,28 +88,27 @@ def create_entity(entity_type):
   return jsonify(id=entity_id), 201
 
 
-@main.route("/<entity_type>/<int:entity_id>", methods=["GET"])
-def retrieve_entity(entity_type, entity_id):
-  entity = get_entity(entity_type, entity_id)
+@main.route("/<int:entity_id>", methods=["GET"])
+def retrieve_entity( entity_id):
+  entity = get_entity( entity_id)
   if entity:
     return jsonify(entity), 200
   return jsonify(error="Entity not found"), 404
 
 
-@main.route("/<entity_type>", methods=["GET"])
-def retrieve_all_entities(entity_type):
-  entities = get_all_entities(entity_type)
-  return jsonify(entities), 200
+# @main.route("/<entity_type>", methods=["GET"])
+# def retrieve_all_entities(entity_type):
+#   entities = get_all_entities(entity_type)
+#   return jsonify(entities), 200
 
 
-@main.route("/<entity_type>/<int:entity_id>", methods=["PUT"])
-def update_entity_route(entity_type, entity_id):
+@main.route("/<int:entity_id>", methods=["PUT"])
+def update_entity_route( entity_id):
   data = request.json
-  if update_entity(entity_type, entity_id, data):
+  if update_entity( entity_id, data):
     # Send signal for the updated entity
     entity_updated.send(
-        current_app._get_current_object(),
-        entity_type=entity_type,
+        current_app,
         entity_id=entity_id,
         data=data,
     )
@@ -119,14 +116,13 @@ def update_entity_route(entity_type, entity_id):
   return jsonify(error="Update failed"), 404
 
 
-@main.route("/<entity_type>/<entity_id>", methods=["DELETE"])
-def delete_entity_route(entity_type, entity_id):
-  print(f"Deleting {entity_type} with id {entity_id}")
-  if delete_entity(entity_type, entity_id):
+@main.route("/<entity_id>", methods=["DELETE"])
+def delete_entity_route( entity_id):
+  print(f"Deleting entity with id {entity_id}")
+  if delete_entity( entity_id):
     # Send signal for the deleted entity
     entity_deleted.send(
-        current_app._get_current_object(),
-        entity_type=entity_type,
+        current_app,
         entity_id=entity_id,
     )
     return jsonify(success=True), 200
@@ -140,7 +136,7 @@ def create_relationship_route():
 
   # Assuming you want to send a signal for relationship creation as well
   entity_created.send(
-      current_app._get_current_object(),
+      current_app,
       entity_type="relationship",
       entity_id=relationship_id,
       data=data,
@@ -150,11 +146,11 @@ def create_relationship_route():
 
 
 @main.route("/search/entities/<entity_type>", methods=["GET"])
-def search_entity(entity_type):
+def search_entity():
   search_params = request.args.to_dict()
 
   if search_params:
-    results = search_entities_with_type(entity_type, search_params)
+    results = search_entities(search_params)
     return jsonify(results), 200
 
   return jsonify(error="Missing search parameters"), 400

@@ -6,7 +6,7 @@ from typeid import TypeID
 from .base import DatabaseIntegration
 
 class Neo4jIntegration(DatabaseIntegration):
-    def __init__(self, schema_file_path="schema.json"):
+    def __init__(self):
         self.uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
         self.user = os.getenv("NEO4J_USER", "neo4j")
         self.password = os.getenv("NEO4J_PASSWORD")
