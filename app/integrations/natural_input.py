@@ -59,7 +59,7 @@
 from flask import Flask, request, jsonify
 import openai
 import json
-from integration_manager import get_integration_function
+from app.integrations.integration_manager import get_integration_function
 
 app = Flask(__name__)
 

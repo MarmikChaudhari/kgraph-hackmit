@@ -34,7 +34,7 @@ from .models import (
     search_relationships,
 )
 from .signals import entity_created, entity_updated, entity_deleted
-from ..integration_manager import get_integration_function
+from .integrations.integration_manager import get_integration_function
 
 main = Blueprint("main", __name__)
 
