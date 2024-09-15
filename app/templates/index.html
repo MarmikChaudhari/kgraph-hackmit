@@ -1,53 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MindGrasp</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Assuming style.css is available in the correct path -->
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-</head>
-<body>
-    <div class="bg-pattern"></div>
-    <div class="accent-circle"></div>
-    <div class="accent-circle"></div>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+  </head>
 
-    <div class="container">
-        <h1>MindGrasp</h1>
-        
+  <h1>MindGrasp</h1>
+
+  <body>
+    <div class="glow-effect">
+      <div class="container">
         <div id="search-container">
-            <input type="text" id="search-box" placeholder="Search nodes...">
-            <button id="search-btn">Search</button>
-            <button id="add-data-btn">Add Data</button>
-            <button id="refresh-btn">Refresh</button>
+          <input type="text" id="search-box" placeholder="Search nodes..." />
+          <button id="search-btn">Search</button>
+          <button id="add-data-btn">Add Data</button>
+          <button id="refresh-btn">Refresh</button>
         </div>
 
         <div id="answer"></div>
 
         <div id="cy"></div>
 
-        <div id="add-data-form" style="display:none;">
-            <select id="input-type-selector">
-                <option value="natural_input">Natural Input</option>
-                <option value="latent_input">Latent Input</option>
-                <option value="url_input">URL Input</option>
-            </select>
-            <textarea id="data-box" placeholder="Enter data..." rows="4"></textarea>
-            <button id="submit-data-btn">Submit</button>
-            <div id="csv-upload-container">
-                <input type="file" id="csv-file-input" accept=".csv">
-                <button id="csv-upload-btn">Upload CSV</button>
-            </div>
+        <div id="add-data-form" style="display: none">
+          <select id="input-type-selector">
+            <option value="natural_input">Natural Input</option>
+            <option value="latent_input">Latent Input</option>
+            <option value="url_input">URL Input</option>
+          </select>
+          <textarea
+            id="data-box"
+            placeholder="Enter data..."
+            rows="4"
+          ></textarea>
+          <button id="submit-data-btn">Submit</button>
+          <div id="csv-upload-container">
+            <input type="file" id="csv-file-input" accept=".csv" />
+            <button id="csv-upload-btn">Upload CSV</button>
+          </div>
         </div>
 
         <div id="sidebar">
-            <!-- Sidebar content will be dynamically updated -->
+          <!-- Sidebar content will be dynamically updated -->
         </div>
+      </div>
     </div>
 
     <script src="/static/script.js"></script>
-</body>
+  </body>
 </html>
