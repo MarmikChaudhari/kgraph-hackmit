@@ -50,7 +50,7 @@ IdeaStruct is a Flask-based web application that leverages AI to generate and qu
 
 **Passionate About**: Painting, programming, playing the guitar, and reading
 
-### **Idhant Gulatie**
+### **Idhant Gulati**
 **Who?!** A second-year undergraduate student studying computer science at Penn State.
 
 **Passionate About**: Music, badminton, and robotics
