@@ -2,10 +2,8 @@ $(document).ready(function () {
   var cy = cytoscape({
     container: document.getElementById("cy"),
     elements: [
-      // Elements will be dynamically added later
     ],
     style: [
-      // Generic node style
       {
         selector: "node",
         style: {
@@ -209,7 +207,7 @@ $(document).ready(function () {
         source: rel.from_id.toString(),
         target: rel.to_id.toString(),
         relationship: rel.snippet,
-        label: rel.relationship_type, // Optional, if you want to use relationship types as labels
+        label: rel.relationship_type, 
       },
     }));
 
@@ -218,14 +216,14 @@ $(document).ready(function () {
 
   function updateGraphVisualization(data) {
     console.log("Updating graph visualization");
-    console.log("Received data:", data); // Debug: Log received data
+    console.log("Received data:", data); 
 
     // Clear the current graph
     cy.elements().remove();
 
     // Transform and add the new nodes and edges to the graph
     const cytoscapeData = transformDataToCytoscapeFormat(data);
-    console.log("Cytoscape data (nodes and edges):", cytoscapeData); // Debug: Log transformed data
+    console.log("Cytoscape data (nodes and edges):", cytoscapeData); 
 
     cy.add([...cytoscapeData.nodes, ...cytoscapeData.edges]);
 
@@ -242,7 +240,6 @@ $(document).ready(function () {
     fetch("/get-graph-data")
       .then((response) => response.json())
       .then((data) => {
-        // Assuming you have a function to update the graph with new data
         console.log(data);
         updateGraphVisualization(data);
       })
