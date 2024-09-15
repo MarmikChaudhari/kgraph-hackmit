@@ -34,47 +34,46 @@ import openai
 from flask import jsonify
 from app.models import search_relationships, add_relationship
 
-# Your OpenAI API key should be securely stored and accessed. Hardcoding is not recommended for production systems.
 openai.api_key = os.environ['OPENAI_API_KEY']
-openai.base_url = os.environ.get('OPENAI_BASE_URL', 'https://api.openai.com/v1')
 
 OPENAI_MODEL_NAME = "gpt-4-turbo"
 
 def conditional_relationship_addition(app, data):
     with app.app_context():
-        # Validate that we have all necessary identifiers for a relationship
-        required_fields = ['from_id', 'from_type', 'to_id', 'to_type']
+        required_fields = ['from_id', 'to_id', 'relationship']
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"'{field}' is required."}), 400
 
-        # Prepare search parameters, excluding 'relationship_type' if not provided
         search_params = {key: data[key] for key in required_fields}
 
         print(f"Search parameters: {search_params}")
         search_results = search_relationships(search_params)
 
-        # Prepare the message for OpenAI API
         messages = [
             {"role": "system", "content": "You are a helpful assistant. Your task is to determine whether a proposed new relationship between two nodes already exists in the database. You should only consider a relationship a match if all the search parameters correspond exactly to an existing relationship. If you find a match, your response should be the full details of the matching relationship, and only the full details as JSON. If there is no match, respond with 'No Matches'. Your response should always be either just JSON response or 'No Matches'."},
             {"role": "user", "content": f"Existing relationships: {search_results}. Do any of these match the proposed relationship details: {data}?"}
         ]
 
-        # Make a call to OpenAI API
         try:
             response = openai.chat.completions.create(
                 model=os.environ.get('OPENAI_MODEL_NAME', OPENAI_MODEL_NAME),
-                messages=messages
+                messages=[
+            {"role": "system", "content": "You are a helpful assistant. Your task is to determine whether a proposed new relationship between two nodes already exists in the database. You should only consider a relationship a match if all the search parameters correspond exactly to an existing relationship. If you find a match, your response should be the full details of the matching relationship, and only the full details as JSON. If there is no match, respond with 'No Matches'. Your response should always be either just JSON response or 'No Matches'."},
+            {"role": "user", "content": f"Existing relationships: {search_results}. Do any of these match the proposed relationship details: {data}?"}]
             )
-            ai_response = response.choices[0].message.content.strip()
+            
+            ai_response = response.choices[0].message.content if response.choices else None
 
-            # Process the AI's response
+            if ai_response is None:
+                raise ValueError("Unexpected empty response from OpenAI")
+
+            ai_response = ai_response.strip()
+
             if "No Matches" in ai_response:
-                # If no match found, add the new relationship
                 relationship_id = add_relationship(data)
                 return jsonify({"success": True, "relationship": data}), 200
             else:
-                # If a match is found, return the matched relationship data
                 return jsonify({"success": False, "message": "Match found", "matching_relationship": ai_response}), 200
 
         except Exception as e:
