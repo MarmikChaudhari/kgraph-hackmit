@@ -97,6 +97,38 @@ $(document).ready(function () {
     },
   });
 
+  // Add a new function to fetch and display the Matplotlib image
+  function fetchAndDisplayMatplotlibImage() {
+    fetch('/get-matplotlib-image')
+      .then(response => response.text())
+      .then(base64Image => {
+        const imgElement = document.createElement('img');
+        imgElement.src = `data:image/png;base64,${base64Image}`;
+        imgElement.style.maxWidth = '100%';
+        imgElement.style.height = 'auto';
+        
+        // Create a container for the image
+        const container = document.createElement('div');
+        container.id = 'matplotlib-container';
+        container.style.marginTop = '20px';
+        container.appendChild(imgElement);
+        
+        // Add the container to the page
+        const cyContainer = document.getElementById('cy');
+        cyContainer.parentNode.insertBefore(container, cyContainer.nextSibling);
+      })
+      .catch(error => console.error('Error fetching Matplotlib image:', error));
+  }
+
+  // Call the function to display the Matplotlib image
+  fetchAndDisplayMatplotlibImage();
+
+  // Modify the refresh button to also update the Matplotlib image
+  $("#refresh-btn").click(function () {
+    fetchAndUpdateGraph();
+    fetchAndDisplayMatplotlibImage();
+  });
+
   $("#search-btn").on("click", function () {
     var query = $("#search-box").val();
     // Perform the AJAX request to the dynamic endpoint
