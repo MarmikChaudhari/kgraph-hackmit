@@ -1,7 +1,7 @@
 import os
 
-from .memory import InMemoryDatabase
-from .neo4j import Neo4jIntegration
+from memory import InMemoryDatabase
+from neo4j import Neo4jIntegration
 
 db_type = os.getenv("DATABASE_TYPE", "memory").lower()
 

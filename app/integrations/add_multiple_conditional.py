@@ -23,7 +23,7 @@
 
 # app/integrations/add_multiple_nodes_and_relationships.py
 from flask import jsonify
-from integration_manager import get_integration_function
+from app.integration_manager import get_integration_function
 
 
 def add_multiple_conditional(app, data):

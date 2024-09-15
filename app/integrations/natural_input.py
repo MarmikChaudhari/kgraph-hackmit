@@ -59,125 +59,95 @@
 from flask import Flask, request, jsonify
 import openai
 import json
-from integration_manager import get_integration_function
+from app.integration_manager import get_integration_function
 
 app = Flask(__name__)
-
 
 def create_knowledge_graph(app, natural_input):
     with app.app_context():
         try:
             print("start openai call")
 
-            with open("schema.json", "r") as file:
-                schema = json.load(file)
-
-            nodes_properties = {}
-            node_types = []
-            all_edge_types = set()
-
-            for node_type, info in schema.items():
-                all_edge_types.update(info["edge_types"].keys())
-                node_types.append(info["node_type"])  # Collect node types
-                edges = list(info["edge_types"].keys())
-                properties = {
-                    "temp_id": {"type": "integer"},
-                    "name": {"type": "string"},
-                }
-
-                # Add additional properties based on the schema
-                for edge_type, description in info["edge_types"].items():
-                    properties[edge_type] = {
-                        "type": "string",
-                        "description": description,
-                    }
-
-                nodes_properties[node_type] = {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": properties,
-                        "required": ["temp_id", "name"],
+            completion = openai.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """
+                    You are an AI expert specializing in knowledge graph creation with the goal of capturing relationships based on a given input or request.
+                    You are given input in various forms such as paragraph, email, text files, and more.
+                    Your task is to create a knowledge graph based on the input.
+                    Add all relevant entities and their relationships, regardless of their type.
+                    Ensure that every entity is connected to at least one other entity.
+                    """
                     },
-                }
+                    {
+                        "role": "user",
+                        "content": f"Create a knowledge graph from the following text: {natural_input}"
+                    }
+                ],
+                functions=[
+                    {
+                        "name": "knowledge_graph",
+                        "description": "Generate a knowledge graph with entities and relationships. Do your best to capture relationships. Do not abbreviate anything. Do not provide a response that is not part of the JSON.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "nodes": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "temp_id": {"type": "integer"},
+                                                "name": {"type": "string"}
+                                            },
+                                            "required": ["temp_id", "name"]
+                                        }
+                                    }
+                                },
+                                "relationships": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "from_type": {"type": "string"},
+                                            "from_temp_id": {"type": "integer"},
+                                            "to_type": {"type": "string"},
+                                            "to_temp_id": {"type": "integer"},
+                                            "data": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "relationship": {"type": "string"},
+                                                    "snippet": {"type": "string"}
+                                                },
+                                                "required": ["relationship", "snippet"]
+                                            }
+                                        },
+                                        "required": ["from_type", "from_temp_id", "to_type", "to_temp_id", "data"]
+                                    }
+                                }
+                            },
+                            "required": ["nodes", "relationships"]
+                        }
+                    }
+                ],
+                function_call={"name": "knowledge_graph"}
+            )
+   
+            print("OPENAI END")
+            print(completion.choices[0])
 
-            edges = list(all_edge_types)
-            # print(f"edges: {edges}\n")
+            response_data = completion.choices[0].message.function_call
+
+            print(response_data)
+
+            return response_data
 
         except Exception as e:
             print(f"Error during knowledge graph creation: {e}")
             return jsonify({"error": str(e)}), 500
-
-        completion = openai.chat.completions.create(
-            model="gpt-4-0125-preview",
-            messages=[
-                {
-                    "role": "system",
-                    "content": f"""
-                You are an AI expert specializing in knowledge graph creation with the goal of capturing relationships based on a given input or request.
-                You are given input in various forms such as paragraph, email, text files, and more.
-                Your task is to create a knowledge graph based on the input.
-                Add all relevant entities and their relationships, regardless of their type.
-                Ensure that every entity is connected to at least one other entity..
-              """,
-                },
-                {
-                    "role": "user",
-                    "content": f"Create a knowledge graph from the following text: {natural_input}",
-                },
-                {
-                    "role": "assistant",
-                    "content": '{"nodes":{"Person":[{"temp_id":1,"name":"Person A"},{"temp_id":2,"name":"Person C"},{"temp_id":3,"name":"Person E"}],"Organization":[{"temp_id":4,"name":"Org B"},{"temp_id":5,"name":"Org D"}]},"relationships":[{"from_type":"Person","from_temp_id":1,"to_type":"Organization","to_temp_id":4,"data":{"relationship":"Works at"}},{"from_type":"Person","from_temp_id":2,"to_type":"Organization","to_temp_id":4,"data":{"relationship":"Works at"}},{"from_type":"Organization","from_temp_id":5,"to_type":"Organization","to_temp_id":4,"data":{"relationship":"Invested in"}},{"from_type":"Person","from_temp_id":3,"to_type":"Organization","to_temp_id":5,"data":{"relationship":"Works at"}}]}',
-                },
-                {
-                    "role": "user",
-                    "content": f"Help me understand the following by creating a structured knowledge graph: {natural_input}",
-                },
-            ],
-
-            functions=[
-                {
-                    "name": "knowledge_graph",
-                    "description": f"Generate a knowledge graph with entities and relationships. Node types must be in {node_types}. Do your best to capture relationships. Do not abbreviate anything. Do not provide a response that is not part of the JSON.",
-                    "parameters": { "type": "object",
-                                    "properties": {
-                                         "nodes": nodes_properties,
-                                         "relationships": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "from_type": {"type": "string"},
-                        "from_temp_id": {"type": "integer"},
-                        "to_type": {"type": "string"},
-                        "to_temp_id": {"type": "integer"},
-                        "data": {
-                            "type": "object",
-                            "properties": {
-                                "relationship": {"type": "string"},
-                                "snippet": {"type": "string"}
-                            },
-                            "required": ["relationship", "snippet"]
-                        }
-                    },
-                    "required": ["from_type", "from_temp_id", "to_type", "to_temp_id", "data"]
-                }
-            }
-        },
-        "required": ["nodes", "relationships"]}
-                    },
-                ],
-            )
-   
-        print("OPENAI END")
-        print(completion.choices[0])
-
-        response_data = completion.choices[0].message.function_call
-
-        print(response_data)
-
-        return response_data
-
 
 def natural_input(app, data):
     with app.app_context():
@@ -189,16 +159,14 @@ def natural_input(app, data):
             # Retrieve the callable function for the add_multiple_conditional integration
             print("get function")
             add_multiple_conditional_function = get_integration_function(
-                "add_multiple_conditional"
-            )
+                "add_multiple_conditional")
 
             if not add_multiple_conditional_function:
                 raise ValueError("Target integration function not found")
 
             # Prepare the data in the format expected by the add_multiple_conditional integration
-
             print("start adding")
-            add_multiple_conditional_data = knowledge_graph_data
+            add_multiple_conditional_data = json.loads(knowledge_graph_data)
 
             # Call the target integration function and get the response
             response = add_multiple_conditional_function(
@@ -206,10 +174,10 @@ def natural_input(app, data):
             )
 
             return response
+        
         except Exception as e:
             print(f"Failed to trigger add_multiple_conditional: {e}")
             return jsonify({"error": str(e)}), 500
-
 
 def register(integration_manager):
     integration_manager.register("natural_input", natural_input)

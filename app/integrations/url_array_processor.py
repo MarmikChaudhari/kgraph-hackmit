@@ -2,7 +2,7 @@
 
 from flask import jsonify
 from urllib.parse import urlparse, quote
-from integration_manager import get_integration_function
+from app.integration_manager import get_integration_function
 
 # Function to check if a string is a valid URL
 def is_valid_url(url):
