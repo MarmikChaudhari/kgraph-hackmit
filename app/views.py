@@ -46,9 +46,8 @@ def index():
 @main.route("/get-graph-data", methods=["GET"])
 def get_graph_data():
   # Assuming get_all_entities returns all the graph data you need
-  print("Fetching graph data...")
   all_entities = get_full_graph()
-  print("Retrieved graph data:")
+  print("ALL ENTITIES")
   print(all_entities)
   return jsonify(all_entities), 200
 

@@ -1,4 +1,4 @@
-# MindGrasp
+# IdeaStruct
 
 ## Overview
 
@@ -39,19 +39,19 @@ MindGrasp utilizes knowledge graphs as a powerful tool for collecting, represent
 Throughout the process, we held regular check-ins to discuss progress and overcome obstacles, making the most of time constraints alotted by HackMIT.
 
 ## Technical Details
-MindGrasp is a Flask-based web application that leverages AI to generate and query a dynamic knowledge graph. It integrates OpenAI's GPT models for natural language processing, with a flexible backend supporting both Neo4j and in-memory graph databases. The application features a modular architecture with a custom integration manager for extensibility. On the frontend, it uses Cytoscape.js for interactive graph visualization. Key functionalities include AI-driven entity and relationship extraction, conditional data addition to prevent duplicates, and URL scraping for automated data ingestion.
+IdeaStruct is a Flask-based web application that leverages AI to generate and query a dynamic knowledge graph. It integrates OpenAI's GPT models for natural language processing, with a flexible backend supporting both Neo4j and in-memory graph databases. The application features a modular architecture with a custom integration manager for extensibility. On the frontend, it uses Cytoscape.js for interactive graph visualization. Key functionalities include AI-driven entity and relationship extraction, conditional data addition to prevent duplicates, and URL scraping for automated data ingestion.
 
 ## Meet the team!
 
 ### **Marmik Chaudhari**
-**Who?!** A second-year undergraduate student studying ?? at Penn State.
+**Who?!** A second-year undergraduate student studying computer science and math at Penn State.
 
-**Passionate About**: ??
+**Passionate About**: Painting, programming, playing the guitar, and reading
 
 ### **Idhant Gulatie**
-**Who?!** A second-year undergraduate student studying ?? at Penn State.
+**Who?!** A second-year undergraduate student studying computer science at Penn State.
 
-**Passionate About**: ??
+**Passionate About**: Music, badminton, and robotics
 
 ### **Haylie Pedersen**
 **Who?!** A second-year undergraduate student studying computer science with a concentration in software at Northeastern University.
@@ -59,6 +59,6 @@ MindGrasp is a Flask-based web application that leverages AI to generate and que
 **Passionate About**: Coffee, reading, web development, and sleeping :)
 
 ### **Vivek Patel**
-**Who?!** A second-year undergraduate student studying ?? at Penn State.
+**Who?!** A second-year undergraduate student studying computer science at Penn State.
 
-**Passionate About**: ??
+**Passionate About**: Music, basketball, food, and Netlfix
