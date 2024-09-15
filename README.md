@@ -45,16 +45,20 @@ MindGrasp is a Flask-based web application that leverages AI to generate and que
 
 ### **Marmik Chaudhari**
 **Who?!** A second-year undergraduate student studying ?? at Penn State.
+
 **Passionate About**: ??
 
 ### **Idhant Gulatie**
 **Who?!** A second-year undergraduate student studying ?? at Penn State.
+
 **Passionate About**: ??
 
 ### **Haylie Pedersen**
 **Who?!** A second-year undergraduate student studying computer science with a concentration in software at Northeastern University.
+
 **Passionate About**: Coffee, reading, web development, and sleeping :)
 
 ### **Vivek Patel**
 **Who?!** A second-year undergraduate student studying ?? at Penn State.
+
 **Passionate About**: ??
