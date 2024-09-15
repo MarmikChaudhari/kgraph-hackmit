@@ -1,7 +1,7 @@
 from flask import jsonify, Flask
 import requests
 from bs4 import BeautifulSoup
-from app.integration_manager import get_integration_function 
+from integration_manager import get_integration_function 
 from urllib.parse import unquote
 
 app = Flask(__name__)
