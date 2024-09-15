@@ -14,7 +14,7 @@
 # This representation is basic and intended for demonstration or prototyping. For production use, a database and an ORM (Object-Relational Mapping) should be utilized for data persistence and management.
 
 # This is a very basic representation. For a real application, use a database and ORM.
-from base import DatabaseIntegration
+from .base import DatabaseIntegration
 
 next_id = 1
 from typing import List, Dict, Any, Optional

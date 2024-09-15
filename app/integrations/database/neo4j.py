@@ -3,7 +3,7 @@
 import os
 from neo4j import GraphDatabase
 from typeid import TypeID
-from base import DatabaseIntegration
+from .base import DatabaseIntegration
 
 class Neo4jIntegration(DatabaseIntegration):
     def __init__(self, schema_file_path="schema.json"):

@@ -20,8 +20,8 @@
 
 from flask import Flask
 from app.integrations.integration_manager import initialize_integrations
-from integrations.database import CurrentDBIntegration
-from .models import set_database_integration
+from app.integrations.database import CurrentDBIntegration
+from app.models import set_database_integration
 from dotenv import load_dotenv
 import os
 

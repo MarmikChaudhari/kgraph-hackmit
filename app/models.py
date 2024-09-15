@@ -48,3 +48,7 @@ def search_relationships(search_params):
     if current_db_integration is None:
         raise ValueError("Database integration is not set.")
     return current_db_integration.search_relationships(search_params)
+
+def search_entities_with_type(entity_type, search_params):
+    # Implementation here
+    pass
