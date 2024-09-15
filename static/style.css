@@ -195,3 +195,7 @@ button:hover {
         width: 100%;
     }
 }
+
+img {
+    height: 500px;
+}
