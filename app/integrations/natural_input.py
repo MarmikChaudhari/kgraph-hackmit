@@ -129,42 +129,46 @@ def create_knowledge_graph(app, natural_input):
 
             response_data = completion.choices[0].message.function_call
 
-            print(response_data)
-
-            return response_data
-
+            if response_data and response_data.arguments:
+                return json.loads(response_data.arguments)
+            else:
+                raise ValueError("No valid function call arguments found in the API response")
+            
         except Exception as e:
             print(f"Error during knowledge graph creation: {e}")
-            return jsonify({"error": str(e)}), 500
+            return None
+
 
 def natural_input(app, data):
     with app.app_context():
         try:
-            # Assume create_knowledge_graph returns the correct data structure
-            knowledge_graph_data = create_knowledge_graph(app, data)
-            knowledge_graph_data = json.dumps(knowledge_graph_data, indent=2)
+            # Get the natural input from the data
+            natural_input_text = data.get('natural_input')
+            if not natural_input_text:
+                return jsonify({"error": "No natural input provided"}), 400
+
+            # Create the knowledge graph
+            knowledge_graph_data = create_knowledge_graph(app, natural_input_text)
+            
+            if knowledge_graph_data is None:
+                return jsonify({"error": "Failed to create knowledge graph"}), 500
 
             # Retrieve the callable function for the add_multiple_conditional integration
             print("get function")
-            add_multiple_conditional_function = get_integration_function(
-                "add_multiple_conditional")
+            add_multiple_conditional_function = get_integration_function("add_multiple_conditional")
 
             if not add_multiple_conditional_function:
-                raise ValueError("Target integration function not found")
-
-            # Prepare the data in the format expected by the add_multiple_conditional integration
-            print("start adding")
-            add_multiple_conditional_data = json.loads(knowledge_graph_data)
+                return jsonify({"error": "Target integration function not found"}), 500
 
             # Call the target integration function and get the response
-            response = add_multiple_conditional_function(
-                app, add_multiple_conditional_data
-            )
+            print("start adding")
+            response, status_code = add_multiple_conditional_function(app, knowledge_graph_data)
 
-            return response
+            # The response should already be a Flask response object, so we can return it directly
+            return response, status_code
         
         except Exception as e:
-            print(f"Failed to trigger add_multiple_conditional: {e}")
+            print(f"Failed to process natural input: {e}")
             return jsonify({"error": str(e)}), 500
 
 def register(integration_manager):

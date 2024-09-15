@@ -25,116 +25,94 @@
 from flask import jsonify
 from app.integrations.integration_manager import get_integration_function
 
-
 def add_multiple_conditional(app, data):
-  with app.app_context():
-    try:
-      print(f"\n\nData received: {data}\n\n")
-      print("ADD MULTIPLE NODES AND RELATIONSHIP INTEGRATION STARTED")
-      created_entities = {}
-      entity_names = {}
+    with app.app_context():
+        try:
+            print(f"\n\nData received: {data}\n\n")
+            print("ADD MULTIPLE NODES AND RELATIONSHIP INTEGRATION STARTED")
+            created_entities = {}
+            entity_names = {}
 
-      # Retrieve the callable functions for the conditional additions
-      conditional_entity_add_function = get_integration_function(
-          "conditional_entity_addition")
-      conditional_relationship_add_function = get_integration_function(
-          "conditional_relationship_addition")
+            # Retrieve the callable functions for the conditional additions
+            conditional_entity_add_function = get_integration_function("conditional_entity_addition")
+            conditional_relationship_add_function = get_integration_function("conditional_relationship_addition")
 
-      if (not conditional_entity_add_function
-          or not conditional_relationship_add_function):
-        raise ValueError("Integration function(s) not found")
+            if not conditional_entity_add_function or not conditional_relationship_add_function:
+                raise ValueError("Integration function(s) not found")
 
-      # Handle entity additions
-      for entity_type, entities in data["nodes"].items():
-        created_entities[entity_type] = {}
+            # Handle entity additions
+            nodes = data.get("nodes", [])
+            for entity in nodes:
+                temp_id = entity["id"]
+                name = entity["name"]
+                entity_names[temp_id] = name
+                print(f"\nProcessing entity {temp_id} with name {name}\n")
 
-        for entity in entities:
-          temp_id = entity["temp_id"]
-          name = entity["name"]
-          entity_names[temp_id] = name
-          print(f"\nEntity {temp_id} with name {name} added\n")
+                # Prepare the payload as expected by the conditional_entity_addition
+                payload = {"data": entity}
+                # Use conditional_entity_addition to add the entity
+                response, status_code = conditional_entity_add_function(app, payload)
 
-        for entity_data in entities:
-          # Prepare the payload as expected by the conditional_entity_addition
-          payload = {"entity_type": entity_type, "data": entity_data}
-          # Use conditional_entity_addition to add the entity
-          response, status_code = conditional_entity_add_function(app, payload)
+                if status_code != 200:
+                    print(f"Error while adding entity: Status code {status_code}")
+                    continue
 
-          if status_code != 200:
-            # Handle non-OK responses accordingly
-            print(f"Error while adding entity: {response}")
-            continue
+                response_data = response.get_json()
+                print(f"Response data: {response_data}")
 
-          response_data = response.get_json()
-          print(response_data)
+                if response_data.get("success") is False:
+                    print(f"Match found, using existing entity with data: {response_data.get('match_data')}")
+                    entity_id = response_data.get("match_id")
+                else:
+                    print(f"New entity added with data: {response_data.get('created_data')}")
+                    entity_id = response_data.get("entity_id")
 
-          if not response_data["success"]:
-            # Handle the case where the entity already exists
-            print(
-                f"Match found, using existing {entity_type} with data: {response_data.get('match_data')}"
-            )
-          else:
-            # Handle the case where a new entity is created
-            print(
-                f"New {entity_type} added with data: {response_data.get('created_data')}"
-            )
+                if entity_id:
+                    created_entities[temp_id] = entity_id
+                else:
+                    print(f"Warning: No entity ID returned for {name}")
 
-          # Map temp_id to the actual entity identifier
-          created_entities[entity_type][entity_data.get("temp_id")] = (
-              response_data.get("entity_id", response_data.get("match_id")))
+            print(f"\n\nEntity Names: {entity_names}\n\n")
+            print(f"Created Entities: {created_entities}\n\n")
 
-          print(f"\n\nEntity Names: {entity_names}\n\n")
+            # Handle relationship additions
+            relationships = data.get("relationships", [])
+            for relationship in relationships:
+                from_id = created_entities.get(relationship["from_id"])
+                to_id = created_entities.get(relationship["to_id"])
+                
+                if from_id is None or to_id is None:
+                    print(f"Error: Missing entity for relationship: {relationship}")
+                    continue
 
-      # Handle relationship additions
-      for relationship in data["relationships"]:
-        from_temp_id = relationship["from_temp_id"]
-        to_temp_id = relationship["to_temp_id"]
-        relationship_data = relationship["data"]
+                relationship_data = {
+                    "from_id": from_id,
+                    "to_id": to_id,
+                    "relationship": relationship.get("relationship", "associated"),
+                    "snippet": relationship.get("snippet", "")
+                }
 
-        from_id = created_entities[relationship["from_type"]][
-            relationship["from_temp_id"]]
-        to_id = created_entities[relationship["to_type"]][
-            relationship["to_temp_id"]]
-        relationship_data = relationship["data"]
-        relationship_data["from_id"] = from_id
-        relationship_data["to_id"] = to_id
-        relationship_data["from_type"] = relationship["from_type"]
-        relationship_data["to_type"] = relationship["to_type"]
-        relationship_data["from_entity"] = entity_names[from_temp_id]
-        relationship_data["to_entity"] = entity_names[to_temp_id]
-        relationship_data["relationship_type"] = relationship.get(
-            "relationship",
-            "associated")  # Default to 'associated' if no type provided
+                # Use conditional_relationship_addition to add the relationship
+                response, status_code = conditional_relationship_add_function(app, relationship_data)
 
-        # Use conditional_relationship_addition to add the relationship
-        response, status_code = conditional_relationship_add_function(
-            app, relationship_data)
+                if status_code != 200:
+                    print(f"Error while adding relationship: Status code {status_code}")
+                    continue
 
-        if status_code != 200:
-          # Handle non-OK responses accordingly
-          print(f"Error while adding relationship: {response}")
-          continue
+                response_data = response.get_json()
 
-        response_data = response.get_json()
+                if response_data.get("success") is False:
+                    print(f"Match found, relationship already exists with data: {response_data.get('match_data')}")
+                else:
+                    print(f"New relationship added with data: {relationship_data}")
 
-        if not response_data["success"]:
-          # Handle the case where the relationship already exists
-          print(
-              f"Match found, relationship already exists with data: {response_data.get('match_data')}"
-          )
-        else:
-          # Handle the case where a new relationship is created
-          print(f"New relationship added with data: {relationship_data}")
-
-      return jsonify({
-          "success": True,
-          "created_entities": created_entities
-      }), 200
-    except Exception as e:
-      print(f"Failed to add multiple nodes and relationships: {e}")
-      return jsonify({"error": str(e)}), 500
-
+            return jsonify({
+                "success": True,
+                "created_entities": created_entities
+            }), 200
+        except Exception as e:
+            print(f"Failed to add multiple nodes and relationships: {e}")
+            return jsonify({"error": str(e)}), 500
 
 def register(integration_manager):
-  integration_manager.register("add_multiple_conditional",
-                               add_multiple_conditional)
+    integration_manager.register("add_multiple_conditional", add_multiple_conditional)
