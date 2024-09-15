@@ -19,8 +19,8 @@
 # The function returns the configured Flask application instance, ready to be used or further configured.
 
 from flask import Flask
-from .integration_manager import initialize_integrations
-from .integrations.database import CurrentDBIntegration
+from integration_manager import initialize_integrations
+from integrations.database import CurrentDBIntegration
 from .models import set_database_integration
 from dotenv import load_dotenv
 import os

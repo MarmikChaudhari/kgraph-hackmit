@@ -59,7 +59,7 @@
 from flask import Flask, request, jsonify
 import openai
 import json
-from ..integration_manager import get_integration_function
+from integration_manager import get_integration_function
 
 app = Flask(__name__)
 
@@ -117,9 +117,8 @@ def create_knowledge_graph(app, natural_input):
                 You are an AI expert specializing in knowledge graph creation with the goal of capturing relationships based on a given input or request.
                 You are given input in various forms such as paragraph, email, text files, and more.
                 Your task is to create a knowledge graph based on the input.
-                Only use organizations, people, and events as nodes and do not include concepts or products.
-                Only add nodes that have a relationship with at least one other node.
-                Make sure that the node type (people, org, event) matches the to_type or for_type when the entity is part of a relationship.
+                Add all relevant entities and their relationships, regardless of their type.
+                Ensure that every entity is connected to at least one other entity..
               """,
                 },
                 {
@@ -135,66 +134,47 @@ def create_knowledge_graph(app, natural_input):
                     "content": f"Help me understand the following by creating a structured knowledge graph: {natural_input}",
                 },
             ],
+
             functions=[
                 {
                     "name": "knowledge_graph",
                     "description": f"Generate a knowledge graph with entities and relationships. Node types must be in {node_types}. Do your best to capture relationships. Do not abbreviate anything. Do not provide a response that is not part of the JSON.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "nodes": {
-                                "type": "object",
-                                "properties": nodes_properties,
-                            },
-                            "relationships": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
+                    "parameters": { "type": "object",
                                     "properties": {
-                                        "from_type": {
-                                            "type": "string",
-                                        },
-                                        "from_temp_id": {"type": "integer"},
-                                        "to_type": {
-                                            "type": "string",
-                                        },
-                                        "to_temp_id": {"type": "integer"},
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "relationship": {
-                                                    "type": "string",
-                                                    "description": "Detailed relationship information between the two properties.",
-                                                    "enum": edges,
-                                                },
-                                                "snippet": {
-                                                    "type": "string",
-                                                    "description": "Provide a snippet from the source word for word (either one or more full sentences) describing this relationship between the two entities.",
-                                                },
-                                            },
-                                            "required": ["relationship", "snippet"],
-                                        },
-                                    },
-                                    "required": [
-                                        "from_type",
-                                        "from_temp_id",
-                                        "to_type",
-                                        "to_temp_id",
-                                        "data",
-                                    ],
-                                },
+                                         "nodes": nodes_properties,
+                                         "relationships": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "from_type": {"type": "string"},
+                        "from_temp_id": {"type": "integer"},
+                        "to_type": {"type": "string"},
+                        "to_temp_id": {"type": "integer"},
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "relationship": {"type": "string"},
+                                "snippet": {"type": "string"}
                             },
-                        },
-                        "required": ["nodes", "relationships"],
+                            "required": ["relationship", "snippet"]
+                        }
                     },
+                    "required": ["from_type", "from_temp_id", "to_type", "to_temp_id", "data"]
                 }
-            ],
-            function_call={"name": "knowledge_graph"},
-        )
+            }
+        },
+        "required": ["nodes", "relationships"]}
+                    },
+                ],
+            )
+   
         print("OPENAI END")
         print(completion.choices[0])
 
         response_data = completion.choices[0].message.function_call
+
+        print(response_data)
 
         return response_data
 

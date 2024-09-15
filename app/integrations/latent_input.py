@@ -1,6 +1,6 @@
 import openai
 from flask import jsonify
-from app.integration_manager import get_integration_function
+from integration_manager import get_integration_function
 
 
 def latent_input(app, data):
