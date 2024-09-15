@@ -11,19 +11,19 @@ class DatabaseIntegration(ABC):
         pass
 
     @abstractmethod
-    def get_entity(self, entity_type, entity_id):
+    def get_entity(self, entity_id):
         pass
 
     @abstractmethod
-    def get_all_entities(self, entity_type):
+    def get_all_entities(self):
         pass
 
     @abstractmethod
-    def update_entity(self, entity_type, entity_id, data):
+    def update_entity(self, entity_id, data):
         pass
 
     @abstractmethod
-    def delete_entity(self, entity_type, entity_id):
+    def delete_entity(self, entity_id):
         pass
 
     @abstractmethod
@@ -31,11 +31,7 @@ class DatabaseIntegration(ABC):
         pass
 
     @abstractmethod
-    def search_entities(self, entity_type, search_params):
-        pass
-
-    @abstractmethod
-    def search_entities_with_type(self, entity_type, search_params):
+    def search_entities(self, search_params):
         pass
 
     @abstractmethod
