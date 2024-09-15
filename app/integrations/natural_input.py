@@ -86,53 +86,41 @@ def create_knowledge_graph(app, natural_input):
                         "content": f"Create a knowledge graph from the following text: {natural_input}"
                     }
                 ],
-                functions=[
-                    {
-                        "name": "knowledge_graph",
-                        "description": "Generate a knowledge graph with entities and relationships. Do your best to capture relationships. Do not abbreviate anything. Do not provide a response that is not part of the JSON.",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "nodes": {
+                functions=[{
+                    "name": "knowledge_graph",
+                    "description": "Generate a knowledge graph with entities and relationships based on the input. Capture all relevant relationships. Do not abbreviate anything.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "nodes": {
+                                "type": "array",
+                                "items": {
                                     "type": "object",
-                                    "additionalProperties": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "temp_id": {"type": "integer"},
-                                                "name": {"type": "string"}
-                                            },
-                                            "required": ["temp_id", "name"]
-                                        }
-                                    }
-                                },
-                                "relationships": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "from_type": {"type": "string"},
-                                            "from_temp_id": {"type": "integer"},
-                                            "to_type": {"type": "string"},
-                                            "to_temp_id": {"type": "integer"},
-                                            "data": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "relationship": {"type": "string"},
-                                                    "snippet": {"type": "string"}
-                                                },
-                                                "required": ["relationship", "snippet"]
-                                            }
-                                        },
-                                        "required": ["from_type", "from_temp_id", "to_type", "to_temp_id", "data"]
-                                    }
+                                    "properties": {
+                                        "id": {"type": "integer"},
+                                        "name": {"type": "string"}
+                                    },
+                                    "required": ["id", "name"]
                                 }
                             },
-                            "required": ["nodes", "relationships"]
-                        }
+                            "relationships": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "from_id": {"type": "integer"},
+                                        "to_id": {"type": "integer"},
+                                        "relationship": {"type": "string"},
+                                        "snippet": {"type": "string"}
+                                    },
+                                    "required": ["from_id", "to_id", "relationship", "snippet"]
+                                }
+                            }
+                        },
+                        "required": ["nodes", "relationships"]
                     }
-                ],
+                }
+            ],
                 function_call={"name": "knowledge_graph"}
             )
    
