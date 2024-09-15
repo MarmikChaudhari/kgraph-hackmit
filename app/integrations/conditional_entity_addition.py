@@ -33,60 +33,44 @@
 import os
 import openai
 from flask import jsonify
-from app.models import search_entities_with_type, add_entity
+from app.models import search_entities, add_entity
 
-# Your OpenAI API key should be securely stored and accessed. Hardcoding is not recommended for production systems.
 openai.api_key = os.environ['OPENAI_API_KEY']
-openai.base_url = os.environ.get('OPENAI_BASE_URL', 'https://api.openai.com/v1')
-
-OPENAI_MODEL_NAME = "gpt-4-turbo-preview"
+OPENAI_MODEL_NAME = "gpt-4-turbo"
 
 def conditional_entity_addition(app, data):
     with app.app_context():
-        # Retrieve the entity type from the data
-        entity_type = data.get('entity_type', None)
-        # If no entity type is provided, return an error
-        if not entity_type:
-            return jsonify({"error": "Entity type is required."}), 400
-  
-        # Adjusted to access nested 'data'
-        entity_data = data.get('data', {})
+        if not isinstance(data, dict) or 'name' not in data:
+            return jsonify({"error": "Invalid entity data. 'name' is required."}), 400
+
         search_results = []
-  
-        # Run a search for each parameter in the input data
-        for key, value in entity_data.items():
-            # Ensure only strings are searched with a partial match
-            if isinstance(value, str):
-                search_params = {key: value}
-                print(f"Search parameters: {search_params}")
-                print("entity type: ", entity_type)
-                results = search_entities_with_type(entity_type, search_params)
-                print(f"Search results: {results}")
-                search_results.extend(results)
-  
-        # Combine all search results
-        combined_results = {result['id']: result for result in search_results}.values()
-        print(f"Combined results: {list(combined_results)}")
 
-        # Prepare the message for OpenAI API
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant who's specialty is to decide if new input data matches data already in our database. Review the search results provided, compare against the input data, and if there's a match respond with the ID number of the match, and only the ID number. If there are no matches, respond with 'No Matches'. Your response is ALWAYS an ID number alone, or 'No Matches'. When reviewing whether a match existings in our search results to our new input, take into account that the name may not match perfectly (for example, one might have just a first name, or a nick name, while the other has a full name), in which case look at the additional information about the user to determine if there's a strong likelihood they are the same person. For companies, you should consider different names of the same company as the same, such as EA and Electronic Arts (make your best guess). If the likelihood is strong, respond with and only with the ID number. If likelihood is low, respond with 'No Matches'."},
-          {"role": "user", "content": f"Here are the search results: {list(combined_results)}. Does any entry match the input data: {data}?"}
-        ]
+        # Run a search for the entity name
+        search_params = {'name': data['name']}
+        print(f"Search parameters: {search_params}")
+        results = search_entities(search_params)
+        print(f"Search results: {results}")
+        search_results.extend(results)
 
-        # Make a call to OpenAI API
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model=os.environ.get('OPENAI_MODEL_NAME', OPENAI_MODEL_NAME),
-                messages=messages
+                messages=[
+            {"role": "system", "content": "You are a helpful assistant specializing in determining if new input data matches existing data in our database. Review the search results provided and compare them against the input data. If there's a match, respond with the ID number of the match, and only the ID number. If there are no matches, respond with 'No Matches'. Your response should ALWAYS be either an ID number alone or 'No Matches'. Consider that names may not match perfectly (e.g., nicknames, partial names). If there's a strong likelihood of a match based on available information, respond with the ID number. If the likelihood is low, respond with 'No Matches'."},
+            {"role": "user", "content": f"Here are the search results: {search_results}. Does any entry match the input data: {data}?"}]
             )
-            ai_response = response.choices[0].message.content.strip()
+            ai_response = response.choices[0].message.content if response.choices else None
+
+            if ai_response is None:
+                raise ValueError("No response from OpenAI")
+            
+            ai_response = ai_response.strip()
+            
             print(f"AI response: {ai_response}")
 
-            # Process the AI's response
             if "no matches" in ai_response.lower():
                 # If no match found, add the new entity
-                entity_id = add_entity(entity_type, data)
+                entity_id = add_entity(data)
                 return jsonify({"success": True, "entity_id": entity_id}), 200
             else:
                 # If a match is found, return the match details

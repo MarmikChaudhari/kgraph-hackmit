@@ -50,11 +50,6 @@ def conditional_relationship_addition(app, data):
         print(f"Search parameters: {search_params}")
         search_results = search_relationships(search_params)
 
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant. Your task is to determine whether a proposed new relationship between two nodes already exists in the database. You should only consider a relationship a match if all the search parameters correspond exactly to an existing relationship. If you find a match, your response should be the full details of the matching relationship, and only the full details as JSON. If there is no match, respond with 'No Matches'. Your response should always be either just JSON response or 'No Matches'."},
-            {"role": "user", "content": f"Existing relationships: {search_results}. Do any of these match the proposed relationship details: {data}?"}
-        ]
-
         try:
             response = openai.chat.completions.create(
                 model=os.environ.get('OPENAI_MODEL_NAME', OPENAI_MODEL_NAME),
