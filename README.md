@@ -4,6 +4,9 @@
 
 IdeaStruct utilizes knowledge graphs as a powerful tool for collecting, representing, and summarizing various forms of input data. The idea revolves around creating a structured graph where diverse data points are modeled as nodes, and the relationships between them are represented by edges. The central node acts as a summary point, collecting and aggregating the input data from the other nodes. IdeaStruct simplifies the interpretation, analysis, and understanding of complex, interconnected information.
 
+![alt text](idea-struct.png)
+
+
 ![alt text](image.png)
 
 ## Development Process
